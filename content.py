@@ -15,10 +15,10 @@ ITEMS = [
          body="Planning a Wonderla day with family or friends? Make it a full getaway - book the whole villa, day-use (4/8/12 hrs) or overnight.",
          tags="#Wonderla #WonderlaHyderabad #FamilyTrip #HyderabadThingsToDo"),
     # ---- wedding guests (villa photos only; venue names are used just to say where the guests are coming from) ----
-    dict(id="wed_swagat", title="Wedding at Swagat Grand? Stay with family at VanThara", lines=["Wedding at Swagat Grand?", "Stay together, minutes away", "5 AC bedrooms for the family"],
+    dict(id="wed_swagat", title="Wedding at JV Swagath Convention? Stay with family at VanThara", lines=["Wedding at Swagath Convention?", "Stay just 5 min away", "5 AC bedrooms for the family"],
          photos=["villa-exterior-corner-view", "gallery-lounge", "bedroom-wooden-bed", "rooftop-terrace", "home-theater-living-room"],
-         body="Family and guests coming for a wedding at Swagat Grand, Turkayamjal? Skip scattered hotel rooms - book the whole villa: 5 AC bedrooms, a big kitchen, lounges and a rooftop terrace, all under one roof.",
-         tags="#WeddingGuests #WeddingStay #SwagatGrand #Turkayamjal #GuestAccommodation #HyderabadWedding"),
+         body="Family and guests coming for a wedding at JV Swagath Convention, Turkayamjal? Skip scattered hotel rooms - book the whole villa, only minutes away: 5 AC bedrooms, a big kitchen, lounges and a rooftop terrace, all under one roof.",
+         tags="#WeddingGuests #WeddingStay #SwagathConvention #Turkayamjal #GuestAccommodation #HyderabadWedding"),
     dict(id="wed_veda", title="Wedding at Veda Convention? Stay 7 min away", lines=["Wedding at Veda Convention?", "Stay just 7 min away", "Whole villa for your guests"],
          photos=["grand-entrance-gate", "gallery-lounge", "gallery-bedroom", "ground-floor-dining-staircase", "rooftop-terrace"],
          body="Attending a wedding or function at Veda Convention, Manneguda? Our private villa is about 7 minutes away - 5 AC bedrooms, a full kitchen, lounges and a rooftop for the whole family.",
