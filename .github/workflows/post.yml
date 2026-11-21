@@ -1,0 +1,43 @@
+name: VanThara auto-post
+on:
+  schedule:
+    - cron: "0 6 * * *"     # 11:30 AM IST  -> reel (YouTube Short + Instagram Reel)
+    - cron: "30 12 * * *"   # 6:00 PM IST   -> Instagram photo carousel
+  workflow_dispatch:
+    inputs:
+      kind:
+        description: reel or carousel
+        default: reel
+
+permissions:
+  contents: write
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: sudo apt-get update && sudo apt-get install -y ffmpeg fonts-dejavu-core
+      - run: pip install -r requirements.txt
+      - name: Decide kind
+        id: k
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then echo "kind=${{ github.event.inputs.kind }}" >> $GITHUB_OUTPUT
+          elif [ "${{ github.event.schedule }}" = "0 6 * * *" ]; then echo "kind=reel" >> $GITHUB_OUTPUT
+          else echo "kind=carousel" >> $GITHUB_OUTPUT; fi
+      - name: Post
+        env:
+          YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
+          YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
+          YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+        run: python run.py --kind ${{ steps.k.outputs.kind }}
+      - name: Save state
+        if: success()
+        run: |
+          git config user.name "vanthara-bot"; git config user.email "bot@users.noreply.github.com"
+          git add state.json || true
+          git diff --cached --quiet || (git commit -m "state: posted" && git push)
