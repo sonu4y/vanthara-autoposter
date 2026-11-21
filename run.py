@@ -30,6 +30,7 @@ def main():
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--demo", action="store_true")
     ap.add_argument("--item", help="force a specific item id")
+    ap.add_argument("--only", choices=["youtube", "instagram"], help="post to one platform only")
     a = ap.parse_args()
 
     state = load()
@@ -54,17 +55,17 @@ def main():
         if a.dry_run:
             return
         results = {}
-        if os.environ.get("YT_REFRESH_TOKEN"):
+        if os.environ.get("YT_REFRESH_TOKEN") and a.only != "instagram":
             import youtube
             try:
                 results["youtube"] = youtube.upload_short(out, content.yt_title(item), content.caption(item, "youtube"),
                                                           tags=[t.strip("#") for t in item["tags"].split()])
             except Exception as e:
                 print("YouTube failed:", e)
-        if os.environ.get("IG_ACCESS_TOKEN"):
-            import instagram
+        if os.environ.get("IG_ACCESS_TOKEN") and a.only != "youtube":
+            import instagram, host
             try:
-                results["instagram"] = instagram.publish_reel(out, content.caption(item, "instagram"))
+                results["instagram"] = instagram.publish_reel(host.host_public(out), content.caption(item, "instagram"))
             except Exception as e:
                 print("Instagram failed:", e)
         print("published:", results)

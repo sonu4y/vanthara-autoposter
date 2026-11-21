@@ -36,12 +36,10 @@ def _publish(container_id):
     return _check(requests.post(f"{G}/{_uid()}/media_publish", data={"creation_id": container_id, "access_token": _tok()}, timeout=60))["id"]
 
 
-def publish_reel(video_path, caption):
+def publish_reel(video_url, caption):
+    """video_url must be a public .mp4 URL (see host.py)."""
     c = _check(requests.post(f"{G}/{_uid()}/media", data={
-        "media_type": "REELS", "upload_type": "resumable", "caption": caption, "share_to_feed": "true", "access_token": _tok()}, timeout=60))
-    data = open(video_path, "rb").read()
-    up = requests.post(c["uri"], headers={"Authorization": f"OAuth {_tok()}", "offset": "0", "file_size": str(len(data))}, data=data, timeout=600)
-    _check(up)
+        "media_type": "REELS", "video_url": video_url, "caption": caption, "share_to_feed": "true", "access_token": _tok()}, timeout=60))
     _wait(c["id"])
     return _publish(c["id"])
 
