@@ -14,6 +14,9 @@ on:
       only:
         description: optional - youtube or instagram (leave empty for both)
         default: ""
+      preview:
+        description: set to yes to render and host the files but NOT post anything
+        default: ""
 
 permissions:
   contents: write
@@ -44,6 +47,7 @@ jobs:
           ARGS="--kind ${{ steps.k.outputs.kind }}"
           if [ -n "${{ github.event.inputs.item }}" ]; then ARGS="$ARGS --item ${{ github.event.inputs.item }}"; fi
           if [ -n "${{ github.event.inputs.only }}" ]; then ARGS="$ARGS --only ${{ github.event.inputs.only }}"; fi
+          if [ -n "${{ github.event.inputs.preview }}" ]; then ARGS="$ARGS --preview"; fi
           python run.py $ARGS
       - name: Save state
         if: success()

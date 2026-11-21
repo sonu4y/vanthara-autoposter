@@ -60,18 +60,47 @@ ITEMS = [
     dict(id="bedrooms", title="5 AC bedrooms across 3 floors", lines=["5 bedrooms", "AC in every room", "King bed. Teak bed. Balconies."],
          photos=["bedroom-wooden-bed", "bedroom-with-ac-and-shelves", "gallery-bedroom", "upstairs-lounge-area", "gallery-staircase"],
          body="Master suite with king bed, teak-bed guest room and two upper-floor rooms with a private lounge and balcony views.", tags="#BedroomGoals #LuxuryVilla #SleepWell"),
+    dict(id="golconda", title="Exploring Golconda Fort? Stay in a private villa", lines=["Exploring Hyderabad?", "Come home to a private villa", "Book the whole villa"],
+         photos=["villa-exterior-corner-view", "home-theater-living-room", "rooftop-terrace", "gallery-lounge", "bedroom-wooden-bed"],
+         body="Golconda Fort by day, your own private villa by night - 5 AC bedrooms, home theatre and a rooftop terrace for the whole group.",
+         tags="#GolcondaFort #HyderabadTourism #HyderabadSightseeing #HistoricHyderabad"),
+    dict(id="charminar", title="Charminar & old city trip? Stay in a private villa", lines=["Charminar trip?", "Rest in a private 5BHK villa", "Book the whole villa"],
+         photos=["grand-entrance-gate", "gallery-lounge", "rooftop-terrace", "gallery-kitchen", "bedroom-wooden-bed"],
+         body="Biryani, bangles and Charminar - then come back to a private villa with a full kitchen, lounges and AC bedrooms for everyone.",
+         tags="#Charminar #OldCityHyderabad #HyderabadFoodTrail #HyderabadTourism"),
     dict(id="walkthrough", title="Villa tour - VanThara Homestay", lines=["Welcome to VanThara", "Entire 5BHK villa", "Turkayamjal, Hyderabad"],
          photos=["grand-entrance-gate", "ground-floor-dining-staircase", "ganesha-idol-lobby", "gallery-lounge", "rooftop-terrace"],
          body="Take a quick tour of VanThara Homestay - a private 5-bedroom villa for families, friends and teams.", tags="#VillaTour #HomestayTour #NewVilla"),
 ]
 
 
-def caption(item, platform):
+# Attraction scenes: the reel/carousel opens with photos of the place (Wikimedia Commons, credited),
+# then shows the villa. `near` = optional line shown on the first villa frame. Fill it ONLY with
+# distances you've checked on Google Maps, e.g. "About 25 min from Ramoji Film City".
+SCENES = {
+    "ramoji":    dict(places=[dict(place="Ramoji Film City", query="Ramoji Film City")],
+                      hooks=["A full day of movie magic", "Sets, shows & gardens"], near=""),
+    "wonderla":  dict(places=[dict(place="Wonderla Hyderabad", query="Wonderla Hyderabad")],
+                      hooks=["Rides & water fun", "A day the kids will love"], near=""),
+    "waterfalls": dict(places=[dict(place="Ethipothala Waterfalls", query="Ethipothala Falls"),
+                               dict(place="Kuntala Waterfall", query="Kuntala Waterfall")],
+                      hooks=["Weekend waterfall escape", "Nature at its best"], near=""),
+    "airport":   dict(places=[dict(place="Hyderabad Airport", query="Rajiv Gandhi International Airport Hyderabad")],
+                      hooks=["Flying in or out?", "Rest before your flight"], near=""),
+    "golconda":  dict(places=[dict(place="Golconda Fort", query="Golconda Fort")],
+                      hooks=["Hyderabad's iconic fort", "History at every turn"], near=""),
+    "charminar": dict(places=[dict(place="Charminar", query="Charminar Hyderabad")],
+                      hooks=["The icon of Hyderabad", "Biryani, bangles & more"], near=""),
+}
+
+
+def caption(item, platform, credits=None):
     cta = f"Book the whole villa - WhatsApp {PHONE}\n{SITE}"
     tags = f"{item['tags']} {BASE_TAGS}"
+    cr = ("\n\nPhotos: " + "; ".join(credits)) if credits else ""
     if platform == "youtube":
-        return f"{item['body']}\n\n{cta}\n📍 {LOCATION}\n\n{tags} #Shorts"
-    return f"{item['body']}\n\n{cta}\n📍 {LOCATION}\n.\n{tags}"
+        return f"{item['body']}\n\n{cta}\n📍 {LOCATION}{cr}\n\n{tags} #Shorts"
+    return f"{item['body']}\n\n{cta}\n📍 {LOCATION}{cr}\n.\n{tags}"
 
 
 def yt_title(item):
