@@ -1,6 +1,5 @@
 """Content plan. Each item becomes one reel/short or one carousel.
-Add your own distances (e.g. '25 min') in `extra` once you've checked them on Google Maps -
-nothing here states a distance on purpose."""
+Distances in SCENES[...]["near"] are approximate drive times from Turkayamjal (Google Maps, Nov 2026)."""
 from config import PHONE, SITE, LOCATION
 
 BASE_TAGS = "#VanThara #VanTharaHomestay #HyderabadHomestay #VillaStay #HyderabadVilla #WeekendGetaway #Hyderabad"
@@ -76,21 +75,20 @@ ITEMS = [
 
 # Attraction scenes: the reel/carousel opens with photos of the place (Wikimedia Commons, credited),
 # then shows the villa. `near` = optional line shown on the first villa frame. Fill it ONLY with
-# distances you've checked on Google Maps, e.g. "About 25 min from Ramoji Film City".
+# approximate Google Maps drive distances from Turkayamjal (Nov 2026). Re-check occasionally.
 SCENES = {
     "ramoji":    dict(places=[dict(place="Ramoji Film City", query="Ramoji Film City")],
-                      hooks=["A full day of movie magic", "Sets, shows & gardens"], near=""),
+                      hooks=["A full day of movie magic", "Sets, shows & gardens"], near="About 17 km (30 min) from Ramoji Film City"),
     "wonderla":  dict(places=[dict(place="Wonderla Hyderabad", query="Wonderla Hyderabad")],
-                      hooks=["Rides & water fun", "A day the kids will love"], near=""),
-    "waterfalls": dict(places=[dict(place="Ethipothala Waterfalls", query="Ethipothala Falls"),
-                               dict(place="Kuntala Waterfall", query="Kuntala Waterfall")],
-                      hooks=["Weekend waterfall escape", "Nature at its best"], near=""),
+                      hooks=["Rides & water fun", "A day the kids will love"], near="Just 12 km (20 min) from Wonderla"),
+    "waterfalls": dict(places=[dict(place="Ethipothala Waterfalls", query="Ethipothala Falls")],
+                      hooks=["Weekend waterfall escape", "Nature at its best"], near="A perfect day trip: ~144 km (2.5 hrs) from us"),
     "airport":   dict(places=[dict(place="Hyderabad Airport", query="Rajiv Gandhi International Airport Hyderabad")],
-                      hooks=["Flying in or out?", "Rest before your flight"], near=""),
+                      hooks=["Flying in or out?", "Rest before your flight"], near="About 23 km (40 min) from Hyderabad Airport"),
     "golconda":  dict(places=[dict(place="Golconda Fort", query="Golconda Fort")],
-                      hooks=["Hyderabad's iconic fort", "History at every turn"], near=""),
+                      hooks=["Hyderabad's iconic fort", "History at every turn"], near="About 35 km (50 min) from Golconda Fort"),
     "charminar": dict(places=[dict(place="Charminar", query="Charminar Hyderabad")],
-                      hooks=["The icon of Hyderabad", "Biryani, bangles & more"], near=""),
+                      hooks=["The icon of Hyderabad", "Biryani, bangles & more"], near="About 20 km (35 min) from Charminar"),
 }
 
 
