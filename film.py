@@ -253,7 +253,8 @@ def resolve(demo, used_titles):
                     if not os.path.exists(p):
                         sh(["ffmpeg", "-y", "-loglevel", "error", "-f", "lavfi", "-i", f"testsrc2=size={w}x{h}:rate=25", "-t", "10", "-pix_fmt", "yuv420p", p])
                 else:
-                    p = pexels(s["q"], orient, 10, used_clips) or pixabay(s["q"], orient, 10, used_clips) or (commons_video(s["q"], 10, used_clips, credits) if os.environ.get("FILM_COMMONS_VIDEO") else None)
+                    p = next(iter(sorted(glob.glob(f"clips/{s['id']}*.mp4"))), None)
+                    p = p or pexels(s["q"], orient, 10, used_clips) or pixabay(s["q"], orient, 10, used_clips) or (commons_video(s["q"], 10, used_clips, credits) if os.environ.get("FILM_COMMONS_VIDEO") else None)
                 if p:
                     vis[f] = [("clip", p, s["cap"])]
         if not vis["wide"] or not vis["tall"]:
