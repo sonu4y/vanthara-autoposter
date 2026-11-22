@@ -21,7 +21,7 @@ VIL = "VanThara Homestay"
 V = lambda *s: list(s)
 SCENES = [
     dict(id="intro", kind="places", style="title", chapter="Intro",
-         groups=[dict(q=["Hyderabad skyline", "Hussain Sagar Hyderabad"], n=2, cap=("A Day in Hyderabad", "Six friends. One weekend."))],
+         groups=[dict(q=["Hyderabad skyline", "Hussain Sagar Hyderabad"], n=2, cap=("A Day in Hyderabad", "Explore. Unwind. Discover."))],
          fb_villa=["villa-exterior-corner-view"],
          narr="Hyderabad. A city of stories, flavours and unforgettable weekends. Now imagine experiencing it, with the people who matter most."),
     dict(id="car", kind="clip", chapter="The road trip begins", q=["friends road trip car", "friends in car driving", "group of friends car"],
@@ -348,7 +348,22 @@ def segment(fmt, idx, vis, style, d, out):
     kind, path, cap = vis
     capf = f"{WORK}/cap_{fmt}_{idx}.png"
     caption_png(W, H, cap, style, capf)
-    if kind == "photo":
+    if kind == "photo" and abs(__import__("math").log((lambda im: im.width / im.height)(Image.open(path)) / (W / H))) >= 0.35:
+        # shape differs a lot (e.g. landscape photo in a vertical frame): fill the whole frame and pan across the photo
+        import math
+        im = Image.open(path)
+        sc = max(2 * W / im.width, 2 * H / im.height)
+        pw, ph = int(im.width * sc) // 2 * 2, int(im.height * sc) // 2 * 2
+        pw, ph = max(pw, 2 * W), max(ph, 2 * H)
+        ox, oy = pw - 2 * W, ph - 2 * H
+        ease = f"(1-cos(PI*min(t/{d:.3f},1)))/2"
+        if idx % 2:
+            ease = f"(1-{ease})"
+        fc = (f"[0:v]scale={pw}:{ph}:flags=lanczos,crop=w={2 * W}:h={2 * H}:x='{ox}*{ease}':y='{oy}*{ease}',"
+              f"scale={W}:{H}:flags=lanczos,fps={FPS},setsar=1,{GRADE}[bg];[bg][1:v]overlay=0:0,format=yuv420p[v]")
+        cmd = ["ffmpeg", "-y", "-loglevel", "error", "-loop", "1", "-framerate", str(FPS), "-i", path, "-loop", "1", "-i", capf,
+               "-filter_complex", fc, "-map", "[v]", "-t", f"{d:.3f}", *ENC, out]
+    elif kind == "photo":
         cv = f"{WORK}/cv_{fmt}_{idx}.jpg"
         canvas(path, W, H, cv)
         n = int(d * FPS)
