@@ -145,7 +145,7 @@ def resolve(demo, used_titles):
                         if len(got) >= g["n"]:
                             break
                         try:
-                            got += places.fetch(q, g["n"] - len(got), seed=SEED, width=2400, min_w=1800, exclude=used_titles)
+                            got += places.fetch(q, g["n"] - len(got), seed=SEED, width=2400, min_w=1800, exclude=used_titles | {x["title"] for x in got})
                         except Exception as e:
                             print("commons error:", q, e)
                 for x in got:
