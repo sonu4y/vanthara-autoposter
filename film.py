@@ -140,6 +140,51 @@ def pixabay(queries, orient, need, used):
     return None
 
 
+def commons_video(queries, need, used, credits):
+    """Keyless fallback: free-licensed video clips from Wikimedia Commons."""
+    import places
+    os.makedirs(f"{WORK}/cv", exist_ok=True)
+    for q in queries:
+        try:
+            r = requests.get(places.API, headers=places.UA, timeout=30, params={
+                "action": "query", "format": "json", "generator": "search", "gsrnamespace": 6,
+                "gsrsearch": f"{q} filetype:video", "gsrlimit": 30, "prop": "imageinfo",
+                "iiprop": "url|size|mime|extmetadata", "iiextmetadatafilter": "LicenseShortName|Artist"})
+            r.raise_for_status()
+        except Exception as e:
+            print("commons video error:", e)
+            continue
+        for p in (r.json().get("query", {}).get("pages", {}) or {}).values():
+            ii = (p.get("imageinfo") or [{}])[0]
+            md = ii.get("extmetadata", {})
+            lic = md.get("LicenseShortName", {}).get("value", "")
+            t = p.get("title", "")
+            if t in used or not places._license_ok(lic) or places.BAD_WORDS.search(t):
+                continue
+            if ii.get("width", 0) < 1280 or ii.get("size", 0) > 120_000_000:
+                continue
+            path = f"{WORK}/cv/{abs(hash(t))}.mp4"
+            try:
+                if not os.path.exists(path):
+                    raw = path + ".src"
+                    d = requests.get(ii["url"], headers=places.UA, timeout=300)
+                    d.raise_for_status()
+                    open(raw, "wb").write(d.content)
+                    sh(["ffmpeg", "-y", "-loglevel", "error", "-i", raw, "-an", "-t", "20", "-c:v", "libx264", "-pix_fmt", "yuv420p", path])
+                dur = float(subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", path],
+                                           capture_output=True, text=True).stdout or 0)
+            except Exception as e:
+                print("skip commons video:", e)
+                continue
+            if dur < min(need, 6):
+                continue
+            used.add(t)
+            artist = places._strip(md.get("Artist", {}).get("value", "")) or "Unknown"
+            credits.append(f"{artist[:60]} / Wikimedia Commons ({lic})")
+            return path
+    return None
+
+
 def tts(text, path, demo):
     if demo:
         sh(["ffmpeg", "-y", "-loglevel", "error", "-f", "lavfi", "-i", "anullsrc=r=44100:cl=mono", "-t", str(max(3, len(text.split()) * 0.38)), path])
@@ -206,7 +251,7 @@ def resolve(demo, used_titles):
                     if not os.path.exists(p):
                         sh(["ffmpeg", "-y", "-loglevel", "error", "-f", "lavfi", "-i", f"testsrc2=size={w}x{h}:rate=25", "-t", "10", "-pix_fmt", "yuv420p", p])
                 else:
-                    p = pexels(s["q"], orient, 10, used_clips) or pixabay(s["q"], orient, 10, used_clips)
+                    p = pexels(s["q"], orient, 10, used_clips) or pixabay(s["q"], orient, 10, used_clips) or commons_video(s["q"], 10, used_clips, credits)
                 if p:
                     vis[f] = [("clip", p, s["cap"])]
         if not vis["wide"] or not vis["tall"]:
