@@ -414,7 +414,7 @@ def make_audio(scenes, narr_files, total, out):
     else:
         cnt, sil = len(labels), base
     mixin += f"[{sil}:a]"
-    parts.append(f"{mixin}amix=inputs={cnt + 1}:normalize=0:duration=longest,afade=t=out:st={total - 2:.2f}:d=2[aout]")
+    parts.append(f"{mixin}amix=inputs={cnt + 1}:normalize=0:duration=longest,loudnorm=I=-16:TP=-1.5:LRA=11,afade=t=out:st={total - 2:.2f}:d=2[aout]")
     cmd += ["-filter_complex", ";".join(parts), "-map", "[aout]", "-t", f"{total:.2f}", "-c:a", "aac", "-b:a", "192k", out]
     sh(cmd)
 
