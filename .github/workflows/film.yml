@@ -31,6 +31,7 @@ jobs:
         run: |
           case "${{ github.event.inputs.mode }}" in
             post) python film.py --post ;;
+            ig) python film.py --ig-existing ;;
             draft) python film.py ;;
             *) python film.py --check ;;
           esac

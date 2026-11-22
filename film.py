@@ -441,12 +441,24 @@ def main():
     ap.add_argument("--demo", action="store_true")
     ap.add_argument("--post", action="store_true")
     ap.add_argument("--only", choices=["wide", "tall"])
+    ap.add_argument("--ig-existing", action="store_true", help="publish the already-rendered, approved vertical draft in media/ to Instagram only")
     ap.add_argument("--check", action="store_true", help="only test sources (Commons, Pexels, voice); no rendering")
     a = ap.parse_args()
     os.makedirs(WORK, exist_ok=True)
     os.makedirs("out", exist_ok=True)
 
     scenes, credits = resolve(a.demo, set())
+    if a.ig_existing:
+        import instagram
+        tall = sorted(glob.glob("media/film-tall-*.mp4"))[-1]
+        url = f"https://raw.githubusercontent.com/{os.environ['GITHUB_REPOSITORY']}/main/{tall}"
+        cr = ("\n\nPhoto credits: " + "; ".join(credits)) if credits else ""
+        cap = ("Hyderabad, one unforgettable weekend: Ramoji Film City, Wonderla, Charminar, Golconda - and a private villa to come home to.\n\n"
+               f"Come, discover yourself. Book the whole villa - WhatsApp {config.PHONE}\n{config.SITE}\n📍 {config.LOCATION}{cr}\n.\n"
+               "#Hyderabad #RamojiFilmCity #Wonderla #HyderabadTourism #VillaStay #WeekendGetaway #VanThara #VanTharaHomestay")
+        print("posting", url)
+        print("published:", instagram.publish_reel(url, cap[:2200]))
+        return
     if a.check:
         for s in scenes:
             print(f"CHECK {s['id']}: wide={[(v[0], os.path.basename(v[1])) for v in s['visuals']['wide']]} tall={len(s['visuals']['tall'])}")
