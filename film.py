@@ -144,6 +144,7 @@ def commons_video(queries, need, used, credits):
     """Keyless fallback: free-licensed video clips from Wikimedia Commons."""
     import places
     os.makedirs(f"{WORK}/cv", exist_ok=True)
+    tries = [0]
     for q in queries:
         try:
             r = requests.get(places.API, headers=places.UA, timeout=30, params={
@@ -161,20 +162,21 @@ def commons_video(queries, need, used, credits):
             t = p.get("title", "")
             if t in used or not places._license_ok(lic) or places.BAD_WORDS.search(t):
                 continue
-            if ii.get("width", 0) < 1280 or ii.get("size", 0) > 120_000_000:
+            if ii.get("width", 0) < 1280 or ii.get("size", 0) > 400_000_000:
                 continue
+            tries[0] += 1
+            if tries[0] > 6:
+                return None
             path = f"{WORK}/cv/{abs(hash(t))}.mp4"
             try:
                 if not os.path.exists(path):
-                    raw = path + ".src"
-                    d = requests.get(ii["url"], headers=places.UA, timeout=300)
-                    d.raise_for_status()
-                    open(raw, "wb").write(d.content)
-                    sh(["ffmpeg", "-y", "-loglevel", "error", "-i", raw, "-an", "-t", "20", "-c:v", "libx264", "-pix_fmt", "yuv420p", path])
+                    subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-user_agent", places.UA["User-Agent"], "-i", ii["url"], "-an",
+                                    "-t", "20", "-c:v", "libx264", "-preset", "veryfast", "-pix_fmt", "yuv420p", path],
+                                   check=True, timeout=120)
                 dur = float(subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", path],
                                            capture_output=True, text=True).stdout or 0)
             except Exception as e:
-                print("skip commons video:", e)
+                print("skip commons video:", e, flush=True)
                 continue
             if dur < min(need, 6):
                 continue
