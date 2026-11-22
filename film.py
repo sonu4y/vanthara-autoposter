@@ -43,7 +43,10 @@ SCENES = [
          groups=[dict(q=["Charminar Hyderabad", "Charminar"], n=2, cap=("Charminar", "About 35 min from VanThara Homestay")),
                  dict(q=["Golconda Fort"], n=2, cap=("Golconda Fort", "About 50 min from VanThara Homestay")),
                  dict(q=["Hussain Sagar Buddha statue", "Hussain Sagar"], n=1, cap=("Hussain Sagar", "About 45 min from VanThara Homestay"))],
-         narr="And Hyderabad still has more. The bazaars around Charminar. The old walls of Golconda. Hussain Sagar at dusk. All of it within an easy drive."),
+         narr="And Hyderabad still has more.",
+         lines=[("And Hyderabad still has more. The bazaars and bangles around Charminar, a short drive away.", 2),
+                ("The old walls of Golconda, where the echoes of history still linger.", 2),
+                ("And Hussain Sagar, calm and golden at dusk. All of it, within an easy drive.", 1)]),
     dict(id="sunset", kind="clip", chapter=None, q=["driving at sunset road", "sunset car drive", "golden hour road driving"],
          cap=("Time to go home", ""),
          narr="As the light turns gold, the car goes quiet. Then someone says it. Let us go home."),
@@ -59,10 +62,19 @@ SCENES = [
                  ("bedroom-wooden-bed", ("5 AC bedrooms", "Across 3 floors")),
                  ("bedroom-with-ac-and-shelves", ("Comfortable rooms", "Room for 15+ guests")),
                  ("gallery-staircase", (VIL, "Turkayamjal, Hyderabad"))],
-         narr="A seventy five inch four K home theatre with surround sound. A kitchen big enough to cook together. A rooftop terrace made for late conversations. A private gym. And five air conditioned bedrooms across three floors, with room for fifteen guests."),
-    dict(id="end", kind="villa", chapter="Book your stay", style="end",
-         photos=[("rooftop-terrace", ("Book the whole villa", f"{VIL} | Turkayamjal, Hyderabad")), ("villa-exterior-corner-view", ("Book the whole villa", config.PHONE))],
-         narr="Weekend trips, wedding guests, team offsites and birthdays. Book the whole villa. VanThara Homestay, Turkayamjal, Hyderabad. WhatsApp plus nine one, seven seven three five, seven two six, six zero three."),
+         narr="Step inside.",
+         lines=[("Step inside, and the evening begins in the home theatre. A seventy five inch four K screen, with surround sound.", 1),
+                ("A lounge with room for everyone. To talk, to laugh, and to simply sit together.", 1),
+                ("The kitchen is made for cooking together. Fresh chai, late snacks, a long family dinner.", 1),
+                ("And then the rooftop terrace. Made for late conversations, under the open sky.", 1),
+                ("A private gym, so you can stay fit while you stay.", 1),
+                ("Five air conditioned bedrooms across three floors, with room for fifteen guests. Quiet, comfortable, and truly yours.", 2),
+                ("Every corner of this house feels a little more like home.", 1)]),
+    dict(id="end", kind="villa", chapter="Come, discover yourself", style="end",
+         photos=[("rooftop-terrace", ("Come, discover yourself", f"{VIL} | Turkayamjal, Hyderabad")), ("villa-exterior-corner-view", ("Book the whole villa", config.PHONE))],
+         narr="Some places are more than somewhere to stay.",
+         lines=[("Some places are more than somewhere to stay. They are where you slow down, breathe, and find yourself again.", 1),
+                ("VanThara Homestay. Turkayamjal, Hyderabad. Come, discover yourself. WhatsApp plus nine one, seven seven three five, seven two six, six zero three.", 1)]),
 ]
 
 
@@ -193,7 +205,7 @@ def tts(text, path, demo):
         return True
     try:
         import edge_tts
-        asyncio.run(edge_tts.Communicate(text, VOICE, rate="-4%").save(path))
+        asyncio.run(edge_tts.Communicate(text, VOICE, rate="-17%", pitch="-2Hz", volume="-4%").save(path))
         return os.path.getsize(path) > 1000
     except Exception as e:
         print("TTS failed:", e)
@@ -368,7 +380,7 @@ def build(fmt, scenes, plan, audio, total, out, crf, maxrate):
     for s in scenes:
         n = len(s["visuals"][fmt])
         for i, vis in enumerate(s["visuals"][fmt]):
-            vd = s["D"] / n
+            vd = s["vds"][i]
             f = f"{WORK}/seg_{fmt}_{k:02d}.mp4"
             segment(fmt, k, vis, s.get("style") if s.get("style") != "title" or i == 0 else None, vd + XF, f)
             segs.append(f)
@@ -391,7 +403,8 @@ def build(fmt, scenes, plan, audio, total, out, crf, maxrate):
     print(f"{fmt}: {out} {os.path.getsize(out)/1e6:.1f} MB")
 
 
-def make_audio(scenes, narr_files, total, out):
+def make_audio(units, total, out):
+    narr_files = [u[0] for u in units]
     cmd = ["ffmpeg", "-y", "-loglevel", "error"]
     for f in narr_files:
         cmd += ["-i", f]
@@ -400,8 +413,8 @@ def make_audio(scenes, narr_files, total, out):
         cmd += ["-stream_loop", "-1", "-i", random.Random(SEED).choice(music)]
     cmd += ["-f", "lavfi", "-i", "anullsrc=r=48000:cl=stereo"]
     parts, labels = [], []
-    for i, s in enumerate(scenes):
-        ms = int((s["start"] + 0.6) * 1000)
+    for i, (_f, st) in enumerate(units):
+        ms = int((st + 0.6) * 1000)
         parts.append(f"[{i}:a]aresample=48000,aformat=channel_layouts=stereo,adelay={ms}|{ms}[n{i}]")
         labels.append(f"[n{i}]")
     base = len(narr_files)
@@ -442,22 +455,35 @@ def main():
         print("CHECK credits:", credits)
         return
     # narration + timing
-    narr_files, t = [], 0.0
+    units, t = [], 0.0
     for s in scenes:
-        f = f"{WORK}/narr_{s['id']}.mp3"
-        ok = tts(s["narr"], f, a.demo)
-        if not ok:
-            sh(["ffmpeg", "-y", "-loglevel", "error", "-f", "lavfi", "-i", "anullsrc=r=44100:cl=mono", "-t", "6", f])
-        narr_files.append(f)
-        n = len(s["visuals"]["wide"])
+        n = min(len(s["visuals"]["wide"]), len(s["visuals"]["tall"]))
+        for f in ("wide", "tall"):
+            s["visuals"][f] = s["visuals"][f][:n]
         mn = MIN_PHOTO if s["visuals"]["wide"][0][0] == "photo" else 6.0
-        s["D"] = max(dur(f) + 1.4, n * mn)
-        s["start"] = t
-        t += s["D"]
+        lines, left, plan = [], n, []
+        for text, c in s.get("lines") or [(s["narr"], n)]:
+            if left <= 0:
+                break
+            c = min(c, left)
+            left -= c
+            plan.append([text, c])
+        if left > 0:
+            plan[-1][1] += left
+        s["vds"], s["start"] = [], t
+        for j, (text, c) in enumerate(plan):
+            f = f"{WORK}/narr_{s['id']}_{j}.mp3"
+            if not tts(text, f, a.demo):
+                sh(["ffmpeg", "-y", "-loglevel", "error", "-f", "lavfi", "-i", "anullsrc=r=44100:cl=mono", "-t", "6", f])
+            vd = max((dur(f) + 1.3) / c, mn)
+            units.append((f, t))
+            s["vds"] += [vd] * c
+            t += vd * c
+        s["D"] = sum(s["vds"])
     total = t + XF
     print(f"scenes: {[s['id'] for s in scenes]}  total {total:.0f}s")
     audio = f"{WORK}/audio.m4a"
-    make_audio(scenes, narr_files, total, audio)
+    make_audio(units, total, audio)
 
     outs = {}
     for fmt, crf, mr in (("wide", 20, "8M"), ("tall", 23, "3500k")):
