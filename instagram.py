@@ -21,7 +21,7 @@ def _check(r):
     return r.json()
 
 
-def _wait(container_id, tries=40):
+def _wait(container_id, tries=120):
     for _ in range(tries):
         s = _check(requests.get(f"{G}/{container_id}", params={"fields": "status_code,status", "access_token": _tok()}, timeout=30))
         if s.get("status_code") == "FINISHED":

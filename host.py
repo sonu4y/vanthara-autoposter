@@ -44,15 +44,16 @@ def _push(msg):
         _git("push", "origin", "HEAD:main")
 
 
-def host_public(path):
+def host_public(path, prefix=None, keep=KEEP):
     repo = os.environ.get("GITHUB_REPOSITORY")
     if not repo:
         raise RuntimeError("Hosting reels needs to run inside GitHub Actions (GITHUB_REPOSITORY not set).")
     os.makedirs("media", exist_ok=True)
     name = f"{os.path.splitext(os.path.basename(path))[0]}-{int(time.time())}.mp4"
     shutil.copy(path, os.path.join("media", name))
-    files = sorted(glob.glob("media/*.mp4"), key=os.path.getmtime)
-    for old in files[:-KEEP]:
+    pat = f"media/{prefix}*.mp4" if prefix else "media/*.mp4"
+    files = sorted([f for f in glob.glob(pat) if prefix or not os.path.basename(f).startswith("film-")], key=os.path.getmtime)
+    for old in files[:-keep]:
         os.remove(old)
     _git("config", "user.name", "vanthara-bot")
     _git("config", "user.email", "bot@users.noreply.github.com")

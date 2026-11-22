@@ -20,11 +20,11 @@ def _strip(s):
     return html.unescape(re.sub(r"<[^>]+>", "", s or "")).strip()
 
 
-def search(query, limit=40):
+def search(query, limit=40, width=1600, min_w=1200):
     r = requests.get(API, headers=UA, timeout=30, params={
         "action": "query", "format": "json", "generator": "search", "gsrnamespace": 6,
         "gsrsearch": f"{query} filetype:bitmap", "gsrlimit": limit,
-        "prop": "imageinfo", "iiprop": "url|size|mime|extmetadata", "iiurlwidth": 1600,
+        "prop": "imageinfo", "iiprop": "url|size|mime|extmetadata", "iiurlwidth": width,
         "iiextmetadatafilter": "LicenseShortName|Artist"})
     r.raise_for_status()
     out = []
@@ -35,17 +35,17 @@ def search(query, limit=40):
         title = p.get("title", "")
         if ii.get("mime") != "image/jpeg" or not _license_ok(lic) or BAD_WORDS.search(title):
             continue
-        if ii.get("width", 0) < 1200 or ii.get("height", 0) < 800:
+        if ii.get("width", 0) < min_w or ii.get("height", 0) < 800:
             continue
         artist = _strip(md.get("Artist", {}).get("value", "")) or "Unknown"
         out.append(dict(title=title, url=ii.get("thumburl") or ii["url"], license=lic, artist=artist[:60]))
     return out
 
 
-def fetch(query, n=3):
+def fetch(query, n=3, seed=None, width=1600, min_w=1200, exclude=()):
     """Return up to n dicts {path, credit}. Picks vary by day so repeat cycles look different."""
-    found = search(query)
-    random.Random(datetime.date.today().toordinal()).shuffle(found)
+    found = [f for f in search(query, width=width, min_w=min_w) if f["title"] not in exclude]
+    random.Random(datetime.date.today().toordinal() if seed is None else seed).shuffle(found)
     os.makedirs(CACHE, exist_ok=True)
     res = []
     for f in found:
