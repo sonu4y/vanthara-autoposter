@@ -12,7 +12,7 @@ from reel import _font, _wrap
 
 FPS, XF = 25, 0.7
 FORMATS = {"wide": (1920, 1080), "tall": (1080, 1920)}
-VOICE = "en-IN-NeerjaNeural"
+VOICE = "en-IN-PrabhatNeural"
 WORK = "cache/film"
 SEED = 2026
 MIN_PHOTO = 4.5      # seconds each photo stays on screen (at least)
@@ -23,7 +23,7 @@ SCENES = [
     dict(id="intro", kind="places", style="title", chapter="Intro",
          groups=[dict(q=["Hyderabad skyline", "Hussain Sagar Hyderabad"], n=2, cap=("A Day in Hyderabad", "Six friends. One weekend."))],
          fb_villa=["villa-exterior-corner-view"],
-         narr="Hyderabad. Six friends. One weekend. And a plan that fits inside a single car."),
+         narr="Hyderabad. A city of stories, flavours and unforgettable weekends. Now imagine experiencing it, with the people who matter most."),
     dict(id="car", kind="clip", chapter="The road trip begins", q=["friends road trip car", "friends in car driving", "group of friends car"],
          cap=("The road trip begins", ""),
          narr="It starts the way every good trip starts. Everyone in the car, the playlist too loud, and nobody quite sure who is navigating."),
@@ -32,27 +32,27 @@ SCENES = [
          narr="Out on the Outer Ring Road the city falls away. First stop, Ramoji Film City, about thirty minutes from the villa where we will sleep tonight."),
     dict(id="ramoji", kind="places", chapter="Ramoji Film City",
          groups=[dict(q=["Film sets in Ramoji Film City", "Ramoji Film City"], n=5, cap=("Ramoji Film City", "About 30 min from VanThara Homestay"))],
-         narr="Ramoji Film City. Streets, palaces and gardens built for the movies, and for one day, you get to walk through all of them."),
+         narr="Ramoji Film City. One of the largest film studio complexes in the world. Grand sets, beautiful gardens and a little movie magic, just thirty minutes from your villa."),
     dict(id="car2", kind="clip", chapter=None, q=["car driving road window", "driving car road trip", "car on road"],
          cap=("Next stop", "Wonderla"),
-         narr="Back on the road. Next up, Wonderla, just twenty minutes from the villa."),
+         narr="Then, a short drive to your next adventure."),
     dict(id="wonderla", kind="places", chapter="Wonderla",
          groups=[dict(q=["Wonderla Hyderabad", "Wonderla amusement park Hyderabad", "Wonderla"], n=5, cap=("Wonderla Hyderabad", "About 20 min from VanThara Homestay"))],
-         narr="Wonderla. Rides that make you scream, a water park that makes you forget the heat, and the kind of laughter you cannot fake."),
+         narr="Wonderla. Thrilling rides, splashing water slides and laughter for every age. Only twenty minutes away."),
     dict(id="city", kind="places", chapter="More of Hyderabad",
          groups=[dict(q=["Charminar Hyderabad", "Charminar"], n=2, cap=("Charminar", "About 35 min from VanThara Homestay")),
                  dict(q=["Golconda Fort"], n=2, cap=("Golconda Fort", "About 50 min from VanThara Homestay")),
                  dict(q=["Hussain Sagar Buddha statue", "Hussain Sagar"], n=1, cap=("Hussain Sagar", "About 45 min from VanThara Homestay"))],
          narr="And Hyderabad still has more.",
-         lines=[("And Hyderabad still has more. The bazaars and bangles around Charminar, a short drive away.", 2),
-                ("The old walls of Golconda, where the echoes of history still linger.", 2),
-                ("And Hussain Sagar, calm and golden at dusk. All of it, within an easy drive.", 1)]),
+         lines=[("Explore the heritage of Hyderabad. The vibrant bazaars of Charminar, just thirty five minutes away.", 2),
+                ("The majestic walls of Golconda Fort.", 2),
+                ("And the calm of Hussain Sagar at sunset.", 1)]),
     dict(id="sunset", kind="clip", chapter=None, q=["driving at sunset road", "sunset car drive", "golden hour road driving"],
          cap=("Time to go home", ""),
-         narr="As the light turns gold, the car goes quiet. Then someone says it. Let us go home."),
+         narr="And when the day is done, the best part begins. Heading home."),
     dict(id="arrival", kind="villa", chapter="Arriving at VanThara",
          photos=[("grand-entrance-gate", (VIL, "Turkayamjal, Hyderabad")), ("villa-exterior-corner-view", (VIL, "Your private 5 BHK villa"))],
-         narr="VanThara Homestay. A private five bedroom villa in Turkayamjal. And tonight, the whole place is yours."),
+         narr="Welcome to VanThara Homestay. A private five bedroom villa in Turkayamjal, Hyderabad. Entirely yours."),
     dict(id="tour", kind="villa", chapter="Inside the villa",
          photos=[("home-theater-living-room", ("Home theatre", "75-inch 4K screen, surround sound")),
                  ("gallery-lounge", ("Lounge", "Room for the whole group")),
@@ -63,18 +63,18 @@ SCENES = [
                  ("bedroom-with-ac-and-shelves", ("Comfortable rooms", "Room for 15+ guests")),
                  ("gallery-staircase", (VIL, "Turkayamjal, Hyderabad"))],
          narr="Step inside.",
-         lines=[("Step inside, and the evening begins in the home theatre. A seventy five inch four K screen, with surround sound.", 1),
-                ("A lounge with room for everyone. To talk, to laugh, and to simply sit together.", 1),
-                ("The kitchen is made for cooking together. Fresh chai, late snacks, a long family dinner.", 1),
-                ("And then the rooftop terrace. Made for late conversations, under the open sky.", 1),
-                ("A private gym, so you can stay fit while you stay.", 1),
-                ("Five air conditioned bedrooms across three floors, with room for fifteen guests. Quiet, comfortable, and truly yours.", 2),
-                ("Every corner of this house feels a little more like home.", 1)]),
+         lines=[("Unwind in your private home theatre, with a seventy five inch four K screen and surround sound.", 1),
+                ("A spacious lounge, designed for conversations that last.", 1),
+                ("A fully equipped kitchen, for meals made together.", 1),
+                ("A rooftop terrace, under the open sky.", 1),
+                ("A private gym, so your routine travels with you.", 1),
+                ("Five air conditioned bedrooms across three floors, with space for up to fifteen guests.", 2),
+                ("Comfort, privacy and space. All yours.", 1)]),
     dict(id="end", kind="villa", chapter="Come, discover yourself", style="end",
          photos=[("rooftop-terrace", ("Come, discover yourself", f"{VIL} | Turkayamjal, Hyderabad")), ("villa-exterior-corner-view", ("Book the whole villa", config.PHONE))],
          narr="Some places are more than somewhere to stay.",
-         lines=[("Some places are more than somewhere to stay. They are where you slow down, breathe, and find yourself again.", 1),
-                ("VanThara Homestay. Turkayamjal, Hyderabad. Come, discover yourself. WhatsApp plus nine one, seven seven three five, seven two six, six zero three.", 1)]),
+         lines=[("VanThara Homestay. Some places are more than somewhere to stay. They are where you slow down, and find yourself again.", 1),
+                ("Come, discover yourself. Book your stay today. WhatsApp plus nine one, seven seven three five, seven two six, six zero three. Or visit vanthara homestay dot com.", 1)]),
 ]
 
 
@@ -205,7 +205,7 @@ def tts(text, path, demo):
         return True
     try:
         import edge_tts
-        asyncio.run(edge_tts.Communicate(text, VOICE, rate="-17%", pitch="-2Hz", volume="-4%").save(path))
+        asyncio.run(edge_tts.Communicate(text, VOICE, rate="-3%").save(path))
         return os.path.getsize(path) > 1000
     except Exception as e:
         print("TTS failed:", e)
@@ -427,7 +427,7 @@ def make_audio(units, total, out):
     else:
         cnt, sil = len(labels), base
     mixin += f"[{sil}:a]"
-    parts.append(f"{mixin}amix=inputs={cnt + 1}:normalize=0:duration=longest,loudnorm=I=-16:TP=-1.5:LRA=11,afade=t=out:st={total - 2:.2f}:d=2[aout]")
+    parts.append(f"{mixin}amix=inputs={cnt + 1}:normalize=0:duration=longest,volume=1.6,alimiter=limit=0.9,afade=t=out:st={total - 2:.2f}:d=2[aout]")
     cmd += ["-filter_complex", ";".join(parts), "-map", "[aout]", "-t", f"{total:.2f}", "-c:a", "aac", "-b:a", "192k", out]
     sh(cmd)
 
