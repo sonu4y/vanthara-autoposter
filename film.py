@@ -3,7 +3,7 @@ Renders widescreen (YouTube) + vertical (Instagram) with motion, crossfades, nar
   python film.py --demo             # offline test with synthetic media
   python film.py                    # render for real (needs internet: Wikimedia, Pexels, edge-tts)
   python film.py --post             # ...and publish to YouTube + Instagram
-Env: PEXELS_API_KEY (stock car/road clips), YT_*, IG_* (only for --post)."""
+Env: PIXABAY_API_KEY or PEXELS_API_KEY (stock car/road clips), YT_*, IG_* (only for --post)."""
 import argparse, asyncio, glob, os, random, re, subprocess, sys
 import requests
 from PIL import Image, ImageDraw, ImageFilter
@@ -109,6 +109,37 @@ def pexels(queries, orient, need, used):
     return None
 
 
+def pixabay(queries, orient, need, used):
+    key = os.environ.get("PIXABAY_API_KEY")
+    if not key:
+        return None
+    os.makedirs(f"{WORK}/pixabay", exist_ok=True)
+    for q in queries:
+        try:
+            r = requests.get("https://pixabay.com/api/videos/", timeout=30,
+                             params=dict(key=key, q=q, per_page=30, safesearch="true"))
+            r.raise_for_status()
+        except Exception as e:
+            print("pixabay error:", e)
+            continue
+        for v in r.json().get("hits", []):
+            vid = "pb%s" % v["id"]
+            if vid in used or v.get("duration", 0) < min(need, 8):
+                continue
+            vs = v.get("videos", {})
+            f = next((vs[k] for k in ("large", "medium") if vs.get(k, {}).get("url") and vs[k].get("width", 0) >= 1280), None)
+            if not f:
+                continue
+            path = f"{WORK}/pixabay/{v['id']}.mp4"
+            if not os.path.exists(path):
+                d = requests.get(f["url"], timeout=180)
+                d.raise_for_status()
+                open(path, "wb").write(d.content)
+            used.add(vid)
+            return path
+    return None
+
+
 def tts(text, path, demo):
     if demo:
         sh(["ffmpeg", "-y", "-loglevel", "error", "-f", "lavfi", "-i", "anullsrc=r=44100:cl=mono", "-t", str(max(3, len(text.split()) * 0.38)), path])
@@ -175,7 +206,7 @@ def resolve(demo, used_titles):
                     if not os.path.exists(p):
                         sh(["ffmpeg", "-y", "-loglevel", "error", "-f", "lavfi", "-i", f"testsrc2=size={w}x{h}:rate=25", "-t", "10", "-pix_fmt", "yuv420p", p])
                 else:
-                    p = pexels(s["q"], orient, 10, used_clips)
+                    p = pexels(s["q"], orient, 10, used_clips) or pixabay(s["q"], orient, 10, used_clips)
                 if p:
                     vis[f] = [("clip", p, s["cap"])]
         if not vis["wide"] or not vis["tall"]:
